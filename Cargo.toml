@@ -1,0 +1,9 @@
+[package]
+name = "string-jail"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+fxhash = "0.2"
+indexmap = "2.7"
