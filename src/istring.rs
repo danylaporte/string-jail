@@ -29,14 +29,14 @@ impl IString {
 impl Borrow<str> for IString {
     #[inline]
     fn borrow(&self) -> &str {
-        unsafe { &*self.0 }
+        self
     }
 }
 
 impl Debug for IString {
     #[inline]
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        Debug::fmt(unsafe { &*self.0 }, f)
+        Debug::fmt(&**self, f)
     }
 }
 
@@ -52,7 +52,7 @@ impl Deref for IString {
 impl Display for IString {
     #[inline]
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        Display::fmt(unsafe { &*self.0 }, f)
+        Display::fmt(&**self, f)
     }
 }
 
@@ -69,7 +69,7 @@ impl Eq for IString {}
 impl Hash for IString {
     #[inline]
     fn hash<H: Hasher>(&self, state: &mut H) {
-        unsafe { &*self.0 }.hash(state);
+        (**self).hash(state);
     }
 }
 
@@ -90,14 +90,14 @@ impl PartialEq for IString {
 impl PartialEq<str> for IString {
     #[inline]
     fn eq(&self, other: &str) -> bool {
-        *unsafe { &*self.0 } == *other
+        (&**self) == other
     }
 }
 
 impl PartialEq<IString> for str {
     #[inline]
     fn eq(&self, other: &IString) -> bool {
-        *self == *unsafe { &*other.0 }
+        self == (&**other)
     }
 }
 
@@ -105,6 +105,20 @@ impl PartialOrd for IString {
     #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
+    }
+}
+
+impl PartialOrd<IString> for str {
+    #[inline]
+    fn partial_cmp(&self, other: &IString) -> Option<Ordering> {
+        Some(self.cmp(&**other))
+    }
+}
+
+impl PartialOrd<str> for IString {
+    #[inline]
+    fn partial_cmp(&self, other: &str) -> Option<Ordering> {
+        Some((**self).cmp(other))
     }
 }
 

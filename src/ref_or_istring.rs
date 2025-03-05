@@ -1,11 +1,13 @@
 use crate::IString;
 use std::{
     borrow::Borrow,
+    cmp::Ordering,
     fmt::{self, Debug, Display, Formatter},
     hash::{Hash, Hasher},
     ops::Deref,
 };
 
+/// A [std::borrow::Cow] alternative for holding IString or str.
 pub enum RefOrIString<'a> {
     Ref(&'a str),
     IString(IString),
@@ -79,6 +81,46 @@ impl Hash for RefOrIString<'_> {
 
 impl PartialEq for RefOrIString<'_> {
     fn eq(&self, other: &Self) -> bool {
-        **self == **other
+        match (self, other) {
+            (Self::IString(a), Self::IString(b)) => a == b,
+            (Self::IString(a), Self::Ref(b)) => a == *b,
+            (Self::Ref(a), Self::IString(b)) => *a == b,
+            (Self::Ref(a), Self::Ref(b)) => a == b,
+        }
+    }
+}
+
+impl PartialEq<str> for RefOrIString<'_> {
+    #[inline]
+    fn eq(&self, other: &str) -> bool {
+        (&**self) == other
+    }
+}
+
+impl PartialEq<RefOrIString<'_>> for str {
+    #[inline]
+    fn eq(&self, other: &RefOrIString<'_>) -> bool {
+        self == (&**other)
+    }
+}
+
+impl PartialOrd for RefOrIString<'_> {
+    #[inline]
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl PartialOrd<str> for RefOrIString<'_> {
+    #[inline]
+    fn partial_cmp(&self, other: &str) -> Option<Ordering> {
+        Some((**self).cmp(other))
+    }
+}
+
+impl PartialOrd<RefOrIString<'_>> for str {
+    #[inline]
+    fn partial_cmp(&self, other: &RefOrIString<'_>) -> Option<Ordering> {
+        Some(self.cmp(&**other))
     }
 }

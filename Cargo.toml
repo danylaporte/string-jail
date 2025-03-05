@@ -7,3 +7,4 @@ publish = false
 [dependencies]
 fxhash = "0.2"
 indexmap = "2.7"
+str_utils = { git = "https://github.com/danylaporte/str_utils.git" }
